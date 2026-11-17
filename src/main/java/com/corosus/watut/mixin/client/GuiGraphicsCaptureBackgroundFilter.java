@@ -2,7 +2,7 @@ package com.corosus.watut.mixin.client;
 
 import com.corosus.watut.client.screen.ScreenParticleRenderer;
 import com.corosus.watut.config.ConfigServerControlledSyncedToClient;
-import com.mojang.blaze3d.pipeline.RenderPipeline;
+import com.mojang.renderpearl.api.pipeline.RenderPipeline;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.render.TextureSetup;
@@ -41,7 +41,7 @@ public class GuiGraphicsCaptureBackgroundFilter {
     @Unique
     private static final float watut$minBackdropScreenFraction = 0.2F;
 
-    @Inject(method = "innerBlit(Lcom/mojang/blaze3d/pipeline/RenderPipeline;Lnet/minecraft/resources/Identifier;IIIIFFFFI)V",
+    @Inject(method = "innerBlit(Lcom/mojang/renderpearl/api/pipeline/RenderPipeline;Lnet/minecraft/resources/Identifier;IIIIFFFFI)V",
             at = @At("HEAD"), cancellable = true, require = 1)
     private void watut$skipBackdropTexture(RenderPipeline renderPipeline, Identifier location, int x0, int x1, int y0, int y1,
                                            float u0, float u1, float v0, float v1, int color, CallbackInfo ci) {

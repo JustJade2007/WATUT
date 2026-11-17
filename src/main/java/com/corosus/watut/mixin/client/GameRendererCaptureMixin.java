@@ -4,8 +4,6 @@ import com.corosus.coroutil.util.CULog;
 import com.corosus.watut.client.screen.RenderHelper;
 import com.corosus.watut.client.screen.ScreenParticleRenderer;
 import com.mojang.blaze3d.pipeline.RenderTarget;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.textures.GpuTextureView;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -59,31 +57,22 @@ public abstract class GameRendererCaptureMixin {
         ScreenParticleRenderer.isRenderingParticleGUI2 = true;
 
         RenderTarget savedRT = accessor.watut_getMainRenderTarget();
-        GpuTextureView savedOutputColorOverride = RenderSystem.outputColorTextureOverride;
-        GpuTextureView savedOutputDepthOverride = RenderSystem.outputDepthTextureOverride;
         if (dbg) CULog.dbg("[watut-capture] BEGIN screen=" + screen.getClass().getName()
                 + " sprTarget=" + spr.getMainRenderTarget().width + "x" + spr.getMainRenderTarget().height
-                + " main=" + name(savedRT) + " ovColor=" + describeView(spr, savedOutputColorOverride)
-                + " ovDepth=" + describeView(spr, savedOutputDepthOverride));
+                + " main=" + name(savedRT));
         try {
             int mouseX = RenderHelper.captureMouseX;
             int mouseY = RenderHelper.captureMouseY;
             GuiGraphicsExtractor graphics = new GuiGraphicsExtractor(mc, guiRenderState, mouseX, mouseY);
 
             accessor.watut_setMainRenderTarget(spr.getMainRenderTarget());
-            RenderSystem.outputColorTextureOverride = spr.getMainRenderTarget().getColorTextureView();
-            RenderSystem.outputDepthTextureOverride = spr.getMainRenderTarget().getDepthTextureView();
             spr.clearMainRenderTarget();
 
-            if (dbg) CULog.dbg("[watut-capture] swapped: main=" + name(accessor.watut_getMainRenderTarget())
-                    + " ovColor=" + describeView(spr, RenderSystem.outputColorTextureOverride)
-                    + " ovDepth=" + describeView(spr, RenderSystem.outputDepthTextureOverride));
+            if (dbg) CULog.dbg("[watut-capture] swapped: main=" + name(accessor.watut_getMainRenderTarget()));
 
             screen.extractRenderStateWithTooltipAndSubtitles(graphics, mouseX, mouseY, deltaTracker.getGameTimeDeltaTicks());
 
             if (dbg) CULog.dbg("[watut-capture] after extractRenderState: main=" + name(accessor.watut_getMainRenderTarget())
-                    + " ovColor=" + describeView(spr, RenderSystem.outputColorTextureOverride)
-                    + " ovDepth=" + describeView(spr, RenderSystem.outputDepthTextureOverride)
                     + " xaeroSentinel=" + RenderHelper.xaeroWorldMapTextureID);
 
             if (RenderHelper.isXaeroGuiMap(screen)) {
@@ -92,22 +81,16 @@ public abstract class GameRendererCaptureMixin {
 
             guiRenderer.render();
 
-            if (dbg) CULog.dbg("[watut-capture] after guiRenderer.render: main=" + name(accessor.watut_getMainRenderTarget())
-                    + " ovColor=" + describeView(spr, RenderSystem.outputColorTextureOverride)
-                    + " ovDepth=" + describeView(spr, RenderSystem.outputDepthTextureOverride));
+            if (dbg) CULog.dbg("[watut-capture] after guiRenderer.render: main=" + name(accessor.watut_getMainRenderTarget()));
         } catch (Exception e) {
             CULog.err("WATUT: secondary gui render pass failed: " + e);
             e.printStackTrace();
             return;
         } finally {
-            RenderSystem.outputColorTextureOverride = savedOutputColorOverride;
-            RenderSystem.outputDepthTextureOverride = savedOutputDepthOverride;
             accessor.watut_setMainRenderTarget(savedRT);
             ScreenParticleRenderer.isRenderingParticleGUI2 = false;
             RenderHelper.performingOwnRender = false;
-            if (dbg) CULog.dbg("[watut-capture] END restored: main=" + name(accessor.watut_getMainRenderTarget())
-                    + " ovColor=" + describeView(spr, RenderSystem.outputColorTextureOverride)
-                    + " ovDepth=" + describeView(spr, RenderSystem.outputDepthTextureOverride));
+            if (dbg) CULog.dbg("[watut-capture] END restored: main=" + name(accessor.watut_getMainRenderTarget()));
         }
 
         spr.performCaptureBlurAndReadback(RenderHelper.captureMouseX, RenderHelper.captureMouseY);
@@ -116,12 +99,5 @@ public abstract class GameRendererCaptureMixin {
     private static String name(RenderTarget target) {
         return target == null ? "null" : target.getClass().getSimpleName() + "@"
                 + Integer.toHexString(System.identityHashCode(target)) + "(" + target.width + "x" + target.height + ")";
-    }
-
-    private static String describeView(ScreenParticleRenderer spr, GpuTextureView view) {
-        if (view == null) return "null";
-        if (view == spr.getMainRenderTarget().getColorTextureView()) return "sprColor";
-        if (view == spr.getMainRenderTarget().getDepthTextureView()) return "sprDepth";
-        return view.getClass().getSimpleName();
     }
 }

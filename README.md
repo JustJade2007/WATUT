@@ -12,3 +12,7 @@ Port of WATUT to Minecraft 26.3 on Fabric.
 
 ## Building
 Run `./gradlew build` (using `build_fabric.gradle` as `build.gradle`). Built jar will be placed in `build/libs/`.
+
+## License & Disclaimer
+This repository is an unofficial fork and port of [WATUT](https://github.com/Corosauce/WATUT).
+All rights, copyright, and trademarks belong to the original author, **Corosus** (https://corosus.com / https://github.com/Corosauce). No ownership or rights are claimed by this fork. See [LICENSE](LICENSE) for details.

@@ -1,2 +1,3 @@
+- add LICENSE clarifying original author (Corosus) ownership with no rights claimed
 - update to 26.3 Fabric
 - update to 1.21.9
